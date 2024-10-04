@@ -157,6 +157,16 @@ void plot_units_render(Plot *p) {
     }
 }
 
+void plot_render_curve2(Plot *p) {
+    for(size_t i = 0; i < p->tracer.count; ++i) {
+        fV2 point = fv2_mul(p->tracer.items[i], UNIT_SCALE);
+        point.x *= p->unit.x;
+        point.y *= p->unit.y;
+        point = fv2_add(point, p->origin);
+        DrawCircle(point.x, point.y, 2.0f, RED);
+    }
+}
+
 void plot_render_curve(Plot *p) {
     if (p->tracer.count <= 1) { return; }
 
@@ -180,10 +190,17 @@ void plot_render_curve(Plot *p) {
     }
 }
 
+#define CIRCLE_CURVE 
+
 void plot_render(Plot *p) {
     plot_axis_render(p);
     plot_units_render(p);
-    plot_render_curve(p);
+    
+    #ifdef CIRCLE_CURVE
+        plot_render_curve2(p);
+    #else
+        plot_render_curve(p);
+    #endif
 }
 
 void plot_clean(Plot *p) {
@@ -203,8 +220,6 @@ int main(void) {
     float dt = 0.1f;
 
     while(!WindowShouldClose()) {
-
-
         if (!IsKeyDown(KEY_SPACE)) {
             pendulum_update_acc(&p);
             pendulum_update_time(&p, dt);
